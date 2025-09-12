@@ -1,0 +1,162 @@
+imagePullSecrets: my-secret
+dockerHubToken:
+
+ingress:
+  name: tp-taxi-ingress
+  domain: tp-taxi.ddns.net
+  secretName: tp-taxi-tls
+
+
+jwt:
+  name_manage_driver: jwt-manage-driver
+  name_manage_customer: jwt-manage-customer
+  name_manage_course: jwt-manage-course
+  publicKey:
+  privateKey:
+
+
+api_manage_driver:
+  deployment:
+    name: api-manage-driver
+    replicas: 2
+    image: quentin0101q/tp-taxi
+    tag: manage-driver-stable
+  service:
+    name: api-manage-driver-svc
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+  secret:
+    name: env-api-manage-driver-secret
+    env:
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      PATH_PUBLIC_KEY: jwt/public.pem
+      PATH_PRIVATE_KEY: jwt/private.pem
+
+postgresql_manage_driver:
+  nodeName:
+  deployment:
+    replicas: 1
+    kind: StatefulSet
+    name: postgres-manage-driver
+    image: "postgres"
+    tag: "17.6-alpine3.21"
+  service:
+    name: postgres-manage-driver-svc
+    port: 5432
+    targetPort: 5432
+  secretName: postgres-secret-driver
+  credentials:
+    user:
+    database:
+    password:
+  config:
+    dshmSizeLimit: 3Gi
+  volume:
+    pvcName: postgres17-manage-driver-pvc
+    pvName: postgres17-manage-driver-pv
+    storage: 3Gi
+    accessModes: ReadWriteOnce
+    persistentVolumeReclaimPolicy: Retain
+    path: /data/tp-gouaich/manage-driver/postgres
+
+
+api_manage_customer:
+  deployment:
+    name: api-manage-customer
+    replicas: 2
+    image: quentin0101q/tp-taxi
+    tag: manage-customer-stable
+  service:
+    name: api-manage-customer-svc
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+  secret:
+    name: env-api-manage-customer-secret
+    env:
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      PATH_PUBLIC_KEY: jwt/public.pem
+      PATH_PRIVATE_KEY: jwt/private.pem
+
+postgresql_manage_customer:
+  nodeName:
+  deployment:
+    replicas: 1
+    kind: StatefulSet
+    name: postgres-manage-customer
+    image: "postgres"
+    tag: "17.6-alpine3.21"
+  service:
+    name: postgres-manage-customer-svc
+    port: 5432
+    targetPort: 5432
+  secretName: postgres-secret-customer
+  credentials:
+    user:
+    database:
+    password:
+  config:
+    dshmSizeLimit: 3Gi
+  volume:
+    pvcName: postgres17-manage-customer-pvc
+    pvName: postgres17-manage-customer-pv
+    storage: 3Gi
+    accessModes: ReadWriteOnce
+    persistentVolumeReclaimPolicy: Retain
+    path: /data/tp-gouaich/manage-customer/postgres
+
+
+
+api_manage_course:
+  deployment:
+    name: api-manage-course
+    replicas: 2
+    image: quentin0101q/tp-taxi
+    tag: manage-course-stable
+  service:
+    name: api-manage-course-svc
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+  secret:
+    name: env-api-manage-course-secret
+    env:
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      PATH_PUBLIC_KEY: jwt/public.pem
+
+postgresql_manage_course:
+  nodeName:
+  deployment:
+    replicas: 1
+    kind: StatefulSet
+    name: postgres-manage-course
+    image: "postgres"
+    tag: "17.6-alpine3.21"
+  service:
+    name: postgres-manage-course-svc
+    port: 5432
+    targetPort: 5432
+
+  secretName: postgres-secret-manage-course
+  credentials:
+    user:
+    database:
+    password:
+  config:
+    dshmSizeLimit: 3Gi
+  volume:
+    pvcName: postgres17-manage-course-pvc
+    pvName: postgres17-manage-course-pv
+    storage: 3Gi
+    accessModes: ReadWriteOnce
+    persistentVolumeReclaimPolicy: Retain
+    path: /data/tp-gouaich/manage-course/postgres
+
+
+tests:
+  service:
+    type: NodePort
+    port: 443
+    nodePort: 31025
+

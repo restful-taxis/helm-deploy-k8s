@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{.Values.api_manage_driver.deployment.name}}
+    namespace: {{.Release.Namespace}}
+spec:
+    replicas: {{.Values.api_manage_driver.deployment.replicas}}
+    selector:
+        matchLabels:
+            app: {{.Values.api_manage_driver.deployment.name}}
+    template:
+        metadata:
+            labels:
+                app: {{.Values.api_manage_driver.deployment.name}}
+        spec:
+            containers:
+                - image: {{.Values.api_manage_driver.deployment.image}}:{{.Values.api_manage_driver.deployment.tag}}
+                  imagePullPolicy: Always
+                  name: {{.Values.api_manage_driver.deployment.name}}
+                  envFrom:
+                      - secretRef:
+                            name: {{.Values.api_manage_driver.secret.name}}
+{{/*            imagePullSecrets:*/}}
+{{/*                - name: {{.Values.imagePullSecrets}}*/}}
+                  volumeMounts:
+                    - mountPath: /app/jwt/
+                      name: {{.Values.jwt.name_manage_driver}}
+                      readOnly: true
+                  env:
+                    - name: JWT_PUBLIC_KEY_FILE
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{.Values.jwt.name_manage_driver}}
+                          key: public.pem
+                    - name: JWT_PRIVATE_KEY_FILE
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{.Values.jwt.name_manage_driver}}
+                          key: private.pem
+            restartPolicy: Always
+            volumes:
+              - name: {{.Values.jwt.name_manage_driver}}
+                secret:
+                  secretName: {{.Values.jwt.name_manage_driver}}

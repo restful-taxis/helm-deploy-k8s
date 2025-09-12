@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{.Values.api_manage_course.deployment.name}}
+    namespace: {{.Release.Namespace}}
+spec:
+    replicas: {{.Values.api_manage_course.deployment.replicas}}
+    selector:
+        matchLabels:
+            app: {{.Values.api_manage_course.deployment.name}}
+    template:
+        metadata:
+            labels:
+                app: {{.Values.api_manage_course.deployment.name}}
+        spec:
+            containers:
+                - image: {{.Values.api_manage_course.deployment.image}}:{{.Values.api_manage_course.deployment.tag}}
+                  imagePullPolicy: Always
+                  name: {{.Values.api_manage_course.deployment.name}}
+                  envFrom:
+                      - secretRef:
+                            name: {{.Values.api_manage_course.secret.name}}
+{{/*            imagePullSecrets:*/}}
+{{/*                - name: {{.Values.imagePullSecrets}}*/}}
+                  volumeMounts:
+                    - mountPath: /app/jwt/
+                      name: {{.Values.jwt.name_manage_course}}
+                      readOnly: true
+                  env:
+                    - name: JWT_PUBLIC_KEY_FILE
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{.Values.jwt.name_manage_course}}
+                          key: public.pem
+            restartPolicy: Always
+            volumes:
+              - name: {{.Values.jwt.name_manage_course}}
+                secret:
+                  secretName: {{.Values.jwt.name_manage_course}}
+

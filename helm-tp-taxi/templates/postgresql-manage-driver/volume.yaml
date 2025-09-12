@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{.Values.postgresql_manage_driver.volume.pvName}}
+  namespace: {{.Release.Namespace}}
+spec:
+  capacity:
+    storage: {{.Values.postgresql_manage_driver.volume.storage}}
+  accessModes:
+    - {{.Values.postgresql_manage_driver.volume.accessModes}}
+  persistentVolumeReclaimPolicy: {{.Values.postgresql_manage_driver.volume.persistentVolumeReclaimPolicy}}
+  storageClassName: local-storage
+  local:
+    path: {{.Values.postgresql_manage_driver.volume.path}}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{.Values.postgresql_manage_driver.nodeName}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{.Values.postgresql_manage_driver.volume.pvcName}}
+  namespace: {{.Release.Namespace}}
+spec:
+  accessModes:
+    - {{.Values.postgresql_manage_driver.volume.accessModes}}
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: {{.Values.postgresql_manage_driver.volume.storage}}
+  volumeName: {{.Values.postgresql_manage_driver.volume.pvName}}

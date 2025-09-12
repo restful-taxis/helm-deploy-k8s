@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: {{.Values.postgresql_manage_driver.deployment.kind}}
+metadata:
+  name: {{.Values.postgresql_manage_driver.deployment.name}}
+  namespace: {{.Release.Namespace}}
+spec:
+  serviceName: {{.Values.postgresql_manage_driver.service.name}}
+  replicas: {{.Values.postgresql_manage_driver.deployment.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.postgresql_manage_driver.deployment.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.postgresql_manage_driver.deployment.name}}
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{.Values.postgresql_manage_driver.nodeName}}
+      containers:
+        - name: {{.Values.postgresql_manage_driver.deployment.name}}
+          image: {{printf "%s:%s" .Values.postgresql_manage_driver.deployment.image .Values.postgresql_manage_driver.deployment.tag}}
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.postgresql_manage_driver.secretName}}
+                  key: database
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.postgresql_manage_driver.secretName}}
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.postgresql_manage_driver.secretName}}
+                  key: password
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+
+            - mountPath: /dev/shm
+              name: dshm
+
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: {{.Values.postgresql_manage_driver.volume.pvcName}}
+
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{.Values.postgresql_manage_driver.config.dshmSizeLimit}}

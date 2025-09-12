@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{.Values.api_manage_customer.deployment.name}}
+    namespace: {{.Release.Namespace}}
+spec:
+    replicas: {{.Values.api_manage_customer.deployment.replicas}}
+    selector:
+        matchLabels:
+            app: {{.Values.api_manage_customer.deployment.name}}
+    template:
+        metadata:
+            labels:
+                app: {{.Values.api_manage_customer.deployment.name}}
+        spec:
+            containers:
+                - image: {{.Values.api_manage_customer.deployment.image}}:{{.Values.api_manage_customer.deployment.tag}}
+                  imagePullPolicy: Always
+                  name: {{.Values.api_manage_customer.deployment.name}}
+                  envFrom:
+                      - secretRef:
+                            name: {{.Values.api_manage_customer.secret.name}}
+{{/*            imagePullSecrets:*/}}
+{{/*                - name: {{.Values.imagePullSecrets}}*/}}
+                  volumeMounts:
+                    - mountPath: /app/jwt/
+                      name: {{.Values.jwt.name_manage_customer}}
+                      readOnly: true
+                  env:
+                    - name: JWT_PUBLIC_KEY_FILE
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{.Values.jwt.name_manage_customer}}
+                          key: public.pem
+                    - name: JWT_PRIVATE_KEY_FILE
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{.Values.jwt.name_manage_customer}}
+                          key: private.pem
+
+            restartPolicy: Always
+            volumes:
+              - name: {{.Values.jwt.name_manage_customer}}
+                secret:
+                  secretName: {{.Values.jwt.name_manage_customer}}

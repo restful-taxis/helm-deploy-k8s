@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{.Values.jwt.name_manage_course}}
+  namespace: {{.Release.Namespace}}
+type: Opaque
+data:
+  public.pem: {{.Values.jwt.publicKey}}

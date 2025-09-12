@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.postgresql_manage_course.service.name}}
+  namespace: {{.Release.Namespace}}
+spec:
+  clusterIP: None
+  selector:
+    app: {{.Values.postgresql_manage_course.deployment.name}}
+  ports:
+    - protocol: TCP
+      port: {{.Values.postgresql_manage_course.service.port}}
+      targetPort: {{.Values.postgresql_manage_course.service.targetPort}}
